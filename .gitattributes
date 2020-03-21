@@ -1,1 +1,1 @@
-*.md linguist-language=sql
+*.sql linguist-language=sql

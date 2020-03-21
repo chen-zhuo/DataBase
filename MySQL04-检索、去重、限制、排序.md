@@ -74,8 +74,6 @@ mysql> SELECT * FROM 通用认证信息;
 
 ### 去重
 
-##### 单列去重
-
 去重检索表中的单个列：`SELECT DISTINCT 字段名称 FROM 表名;`
 
 ```
@@ -103,8 +101,6 @@ mysql> SELECT DISTINCT 认证项目 FROM 通用认证信息;
 ```
 
 ### 限制
-
-##### 限制结果
 
 返回结果前m行数据：`SELECT 字段名称 FROM 通用认证信息 LIMIT m;`
 
