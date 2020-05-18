@@ -6,9 +6,7 @@
 
 ##### 丰富的数据结构
 
-**Redis是一种基于键值对（key-value）格式来存储数据的**，也正由于这种存储格式，可以让Redis拥有丰富的数据结构，Redis中的值可以是由string（字符串）、hash（哈希）、 list（列表）、set（集合）、zset（有序集合）、Bitmaps（位图）、 HyperLogLog、GEO（地理信息定位）等多种数据结构和算法组成，因此 Redis可以满足很多的应用场景。
-
-!> Redis中的键值对（Key-Value），并非Python字典(dict)中一个键对应一个值，它可以一个键对应多个值。
+**Redis是一种基于键值对（key-value）格式来存储数据的，即一个键对应一个值**，也正由于这种存储格式，可以让Redis拥有丰富的数据结构，Redis中的值可以是由string（字符串）、hash（哈希）、 list（列表）、set（集合）、zset（有序集合）、Bitmaps（位图）、 HyperLogLog、GEO（地理信息定位）等多种数据结构和算法组成，因此 Redis可以满足很多的应用场景。
 
 ##### 高性能
 

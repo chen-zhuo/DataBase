@@ -131,7 +131,7 @@ SELECT * FROM 表名 WHERE 字段名 REGEXP 'jet|cat|hat';
 SELECT * FROM 表名 WHERE 字段名 REGEXP 'hao[123]';
 ```
 
-**结合或 `|` 匹配，还可以匹配字符串**：
+**结合 `|` 匹配，还可以匹配字符串**：
 
 ```sql
 -- 检索字段中包含hao1或hao23的所有行
