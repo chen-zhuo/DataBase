@@ -1,12 +1,10 @@
 # 数据结构、内部编码
 
-### 数据结构
-
 **Redis有5种数据结构分别是： string（字符串）、hash（哈希）、list（列表）、set（集合）、zset（有序集合）。**
 
 ![QQ截图20200517153651](image/QQ截图20200517153651.png)
 
-#### 字符串
+### 字符串
 
 **字符串类型是Redis最基础的数据结构。**
 
@@ -16,9 +14,9 @@
 
 ![QQ截图20200517154010](image/QQ截图20200517154010.png)
 
-##### 设置值
+##### 添加值、获取值
 
-**设置单个值命令**：
+**添加值**：添加一个键值对。
 
 ```
 set key value [ex seconds] [px milliseconds] [nx|xx]
@@ -41,57 +39,51 @@ set key value nx == setnx key value
 set key value xx == setxx key value
 ```
 
-下面操作设置键为hello，值为world的键值对，返回结果为OK代表设置成功：
+**获取值**：获取一个键值对的值。
+
+```
+get key
+```
+
+设置键为hello，值为world的键值对，**返回结果为OK代表设置成功**：
 
 ```
 127.0.0.1:6379> set hello world 
 OK
 ```
 
-##### 获取值
-
-**获取单个值命令**：
-
-```
-get key
-```
-
-下面操作获取键hello的值：
+获取键hello的值，**如果要获取的键不存在，则返回nil（空）**：
 
 ```
 127.0.0.1:6379> get hello 
 "world"
-```
 
-如果要获取的键不存在，则返回nil（空）：
-
-```
 127.0.0.1:6379> get not_exist_key 
 (nil)
 ```
 
-##### 批量操作
+##### 批量添加、批量获取
 
-**设置多个值命令**：
+批量添加：批量添加键值对。
 
 ```
 mset key value [key value ...]
 ```
 
-下面操作通过mset命令一次性设置4个键值对：
+批量获取命令：批量获取键值。
+
+```
+mget key [key ...]
+```
+
+通过mset命令一次性设置4个键值对：
 
 ```
 127.0.0.1:6379> mset a 1 b 2 c 3 d 4 
 OK
 ```
 
-**获取多个值命令**：
-
-```
-mget key [key ...]
-```
-
-下面操作批量获取了键a、b、c、d、f的值，**f键不存在，那么它的值为nil（空）**：
+批量获取了键a、b、c、d、f的值，**f键不存在，那么它的值为nil（空）**：
 
 ```
 127.0.0.1:6379> mget a b c d f
@@ -114,11 +106,90 @@ mget key [key ...]
 
 ![QQ截图20200517160348](image/QQ截图20200517160348.png)
 
+##### 长度、切片、替换
 
+**长度**：获取键值长度。
 
+```
+strlen key
+```
 
+例如，当前值为redisworld，所以返回值为10：
 
+```
+127.0.0.1:6379> get key 
+"redisworld" 
+127.0.0.1:6379> strlen key 
+(integer) 10
+```
 
+!> 每个中文占用3个字节长度。
+
+**切片：**`start` 和 `end` 分别是开始位置和结束位置，开始位置从0开始计算，**前闭后闭区间**。
+
+```
+getrange key start end
+```
+
+取best的前两个字符：
+
+```
+127.0.0.1:6379> getrange redis 0 1 
+"be"
+```
+
+**替换**：替换指定位置的字符。
+
+```
+setrange key offeset value
+```
+
+下面操作将值由pest变为了best：
+
+```
+127.0.0.1:6379> set redis pest 
+OK
+127.0.0.1:6379> setrange redis 0 b 
+(integer) 4 
+127.0.0.1:6379> get redis 
+"best"
+```
+
+##### 追加值、返回原值
+
+追加值： **`append` 可以向字符串尾部追加值**。
+
+```
+append key value
+```
+
+返回原值：**`getset` 设置值的同时会返回键原来的值**。
+
+```
+getset key value
+```
+
+字符串后面追加字符串：
+
+```
+127.0.0.1:6379> set key redis
+OK
+127.0.0.1:6379> get key
+"redis"
+127.0.0.1:6379> append key world
+(integer) 10
+127.0.0.1:6379> get key
+"redisworld"
+```
+
+获取原来字符串：
+
+```
+127.0.0.1:6379> getset hello world 
+(nil) 
+127.0.0.1:6379> getset hello redis 
+"world"
+```
 
 ##### 计数
 
@@ -128,11 +199,11 @@ incr key
 
 `incr`命令用于对值做自增操作，返回结果分为三种情况： 
 
-- 值不是整数，返回错误。
-- 值是整数，返回自增后的结果。
-- 键不存在，按照值为0自增，返回结果为1。 
+- **值不是整数，返回错误。**
+- **值是整数，返回自增后的结果**。
+- **键不存在，按照值为0自增，返回结果为1。** 
 
-例如对一个不存在的键执行incr操作后，返回结果是1，再次对键执行incr命令，返回结果是2：
+例如**对一个不存在的键执行incr操作后，返回结果是1，再次对键执行incr命令，返回结果是2**：
 
 ```
 127.0.0.1:6379> exists key 
@@ -161,90 +232,59 @@ incrby key increment
 incrbyfloat key increment
 ```
 
-##### 追加值
+### 哈希
 
-`append` 可以向字符串尾部追加值：
+**在Redis中，哈希类型是指键值本身又是一个键值对结构**，形如`value={{field1，value1}，...{fieldN，valueN}}`。
 
-```
-append 键名 键值
-```
+![QQ截图20200519224409](image/QQ截图20200519224409.png)
 
-追加字符串：
+!> 哈希类型中的映射关系叫作 `field-value`，注意这里的 `value` 是指 `field` 对应的值，不是键对应的值。
 
-```
-127.0.0.1:6379> set key redis
-OK
-127.0.0.1:6379> get key
-"redis"
-127.0.0.1:6379> append key world
-(integer) 10
-127.0.0.1:6379> get key
-"redisworld"
-```
-
-##### 返回原值
+##### 设置值
 
 ```
-getset key value
+hset key field value
 ```
 
-`getset` 和 `set` 一样会设置值，但是不同的是，它同时会返回键原来的值：
+为 `user` 添加一对 `field-value`，**如果设置成功会返回1，反之会返回0**。
 
 ```
-127.0.0.1:6379> getset hello world 
+127.0.0.1:6379> hset user name tom 
+(integer) 1
+```
+
+##### 获取值
+
+```
+hget key field
+```
+
+获取 `user` 的 `name` 域（属性）对应的值：
+
+```
+127.0.0.1:6379> hget user name 
+"tom"
+```
+
+**如果键或 `field` 不存在，会返回 `nil`**
+
+```
+127.0.0.1:6379> hget user:1 age 
+(nil)
+
+127.0.0.1:6379> hget user:2 name 
 (nil) 
-127.0.0.1:6379> getset hello redis 
-"world"
 ```
 
-##### 指定位置字符
 
-```
-setrange key offeset value
-```
 
-下面操作将值由pest变为了best：
 
-```
-127.0.0.1:6379> set redis pest 
-OK
-127.0.0.1:6379> setrange redis 0 b 
-(integer) 4 
-127.0.0.1:6379> get redis 
-"best"
-```
 
-##### 获取部分字符串
 
-**`start` 和 `end` 分别是开始和结束的偏移量，偏移量从0开始计算：**
 
-```
-getrange key start end
-```
 
-取best的前两个字符：
 
-```
-127.0.0.1:6379> getrange redis 0 1 
-"be"
-```
 
-##### 获取长度
-
-```
-strlen 键名
-```
-
-例如，当前值为redisworld，所以返回值为10：
-
-```
-127.0.0.1:6379> get key 
-"redisworld" 
-127.0.0.1:6379> strlen key 
-(integer) 10
-```
-
-!> 每个中文占用3个字节长度。
 
 ### 内部编码
 
