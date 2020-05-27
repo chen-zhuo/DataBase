@@ -234,13 +234,186 @@ getset key value
 
 ![QQ截图20200523155943](image/QQ截图20200523155943.png)
 
-**Redis使用场景典型的是缓存功能**：Redis作为缓存层，MySQL作为存储层，绝大部分请求的数据都是从Redis中获取。由于Redis具有支撑高并发的特性，所以缓存通常能起到加速读写和降低后端压力的作用。
+**Redis典型的使用场景是用作缓存**：Redis作为缓存层，MySQL作为存储层，绝大部分请求的数据都是从Redis中获取。由于Redis具有支撑高并发的特性，所以缓存通常能起到加速读写和降低后端压力的作用。
 
 ![QQ截图20200517190922](image/QQ截图20200517190922.png)
 
+### 哈希
+
+**在Redis中，哈希类型是指键值本身又是一个键值对结构**，形如`value={{field1，value1}，...{fieldN，valueN}}`。
+
+![QQ截图20200519224409](image/QQ截图20200519224409.png)
+
+!> 哈希类型中的映射关系叫作 `field-value`，注意这里的 `value` 是指 `field` 对应的值，不是键对应的值。
+
+##### 添加、获取、删除
+
+添加：**添加一对域值**。
+
+```
+hset key field value
+```
+
+为 `user` 添加一对 `field-value`，**如果设置成功会返回1，反之会返回0**。
+
+```
+127.0.0.1:6379> hset user name tom 
+(integer) 1
+```
+
+获取：**获取域的属性值**。
+
+```
+hget key field
+```
+
+获取 `user` 的 `name` 域（属性）对应的值，**如果键或 `field` 不存在，会返回 `nil`**：
+
+```
+127.0.0.1:6379> hget user name 
+"tom"
+
+127.0.0.1:6379> hget user age 
+(nil)
+
+127.0.0.1:6379> hget user2 name 
+(nil) 
+```
+
+删除：删除除一个或多个 `field`，**返回结果为成功删除 `field` 的个数**。
+
+```
+hdel key field [field ...]
+```
+
+删除 `user` 的 `name` 域，**如果域不存在返回0**：
+
+```
+127.0.0.1:6379> hdel user name
+(integer) 1 
+
+127.0.0.1:6379> hdel user name
+(integer) 0
+```
+
+##### 批量添加、批量获取
+
+`hmset` 和 `hmget` 分别是批量设置和获取 `field-value`，`hmset` 需要的参数是 `key` 和多对 `field-value`，`hmget` 需要的参数是 `key` 和多个 `field`。
+
+```
+hmset key field value [field value ...]
+hmget key field [field ...] 
+```
+
+批量添加、批量获取多个域值：
+
+```
+127.0.0.1:6379> hmset user name mike age 12 city tianjin 
+OK
+127.0.0.1:6379> hmget user name city 
+1) "mike" 
+2) "tianjin"
+```
+
+##### 获取全域、获取全值
+
+获取所有 `field`：
+
+```
+hkeys key
+```
+
+获取所有的`value`：
+
+```
+hvals key
+```
+
+获取所有的 `field-value`：
+
+```
+hgetall key
+```
+
+获取 `user` 全部 `field` 和 `value` 和 `field-value`：
+
+```
+127.0.0.1:6379> hkeys user 
+1) "name" 
+2) "age" 
+3) "city"
+
+127.0.0.1:6379> hvals user 
+1) "mike" 
+2) "12" 
+3) "tianjin"
+
+127.0.0.1:6379> hgetall user 
+1) "name" 
+2) "mike" 
+3) "age" 
+4) "12" 
+5) "city" 
+6) "tianjin"
+```
+
+?> 在使用 `hgetall` 时，如果哈希元素个数比较多，会存在阻塞Redis的可能。如果开发人员只需要获取部分 `field`，可以使用 `hmget`，如果一定要获取全部 `field-value`，可以使用 `hscan` 命令，该命令会渐进式遍历哈希类型。
+
+##### 存在、统计、计算
+
+存在：判断 `field` 是否存在，**存在返回结果为1，不存在时返回0**。
+
+```
+hexists key field
+```
+
+统计：**统计 `field` 个数。**
+
+```
+hlen key
+```
+
+计算：**计算 `value` 的字符串长度。**
+
+```
+hstrlen key field
+```
+
+例如 `user` 有3个 `field`：
+
+```
+127.0.0.1:6379> hset user name tom 
+(integer) 1 
+127.0.0.1:6379> hset user age 23 
+(integer) 1 
+127.0.0.1:6379> hset user city tianjin 
+(integer) 1 
+
+127.0.0.1:6379> hexists user name 
+(integer) 1
+
+127.0.0.1:6379> hlen user 
+(integer) 3
+
+127.0.0.1:6379> hstrlen user name 
+(integer) 3
+```
+
+##### 时间复杂度、使用场景
+
+![QQ截图20200523155801](image/QQ截图20200523155801.png)
+
+**哈希类型比较典型的使用场景是信息存储。**相比其他的存储，用户信息存储更直观，**但Redis去模拟关系型复杂查询开发困难，维护成本高，而关系型数据库可以做复杂的关系查询**。 
+
+![QQ截图20200520225028](image/QQ截图20200520225028.png)
+
+哈希类型是稀疏的，而关系型数据库是完全结构化的，例如哈希类型每个键可以有不同的`field`，而关系型数据库一旦添加新的列，所有行都要为其设置值（即使为NULL）。
+
+![QQ截图20200520225340](image/QQ截图20200520225340.png)
+
 ### 列表
 
-**列表（`list`）类型是用来存储多个有序的字符串。列表中的每个字符串称为元素（`element`），一个列表最多可以存储232-1个元素。**在Redis中，可以对列表两端插入（`push`）和弹出（`pop`），还可以获取指定范围的元素列表、获取指定索引下标的元素等。
+**列表（`list`）类型是用来存储多个有序的字符串。列表中的每个字符串称为元素（`element`），一个列表最多可以存储2^32-1个元素。**在Redis中，可以对列表两端插入（`push`）和弹出（`pop`），还可以获取指定范围的元素列表、获取指定索引下标的元素等。
 
 列表类型有两个特点：
 
@@ -267,17 +440,17 @@ rpush key value [value ...]
 lpush key value [value ...]
 ```
 
-位置添加：**`linsert` 命令会从列表中找到等于 `pivot` 的元素，在其前（before）或者后（after）插入一个新的元素 `value`。**
-
-```
-linsert key before|after pivot value
-```
-
 在列表最右边依次插入元素c、b、a：
 
 ```
 127.0.0. 1:6379> rpush listkey c b a 
 (integer) 3
+```
+
+位置添加：**`linsert` 命令会从列表中找到等于 `pivot` 的元素，在其前（before）或者后（after）插入一个新的元素 `value`。**
+
+```
+linsert key before|after pivot value
 ```
 
 在列表的元素b前插入 java：
@@ -392,7 +565,7 @@ OK
 3) "a"
 ```
 
-##### 长度、阻塞
+##### 长度、阻塞弹出
 
 长度：**计算列表长度。**
 
@@ -407,7 +580,7 @@ llen key
 (integer) 4
 ```
 
-阻塞：阻塞式弹出。
+阻塞弹出：**通过阻塞的方式弹出**。
 
 ```
 blpop key [key ...] timeout 
@@ -460,182 +633,9 @@ brpop key [key ...] timeout
 
 ?> 实际上列表的使用场景很多，在选择时可以参考以下口诀：`lpush+lpop=Stack（栈）` 、`lpush+rpop=Queue（队列）`、`lpush+ltrim=Capped Collection（有限集合）` 、`lpush+brpop=Message Queue（消息队列）`。
 
-### 哈希
-
-**在Redis中，哈希类型是指键值本身又是一个键值对结构**，形如`value={{field1，value1}，...{fieldN，valueN}}`。
-
-![QQ截图20200519224409](image/QQ截图20200519224409.png)
-
-!> 哈希类型中的映射关系叫作 `field-value`，注意这里的 `value` 是指 `field` 对应的值，不是键对应的值。
-
-##### 添加、获取、删除
-
-添加：**添加一对域值**。
-
-```
-hset key field value
-```
-
-为 `user` 添加一对 `field-value`，**如果设置成功会返回1，反之会返回0**。
-
-```
-127.0.0.1:6379> hset user name tom 
-(integer) 1
-```
-
-获取：**获取域的属性值**。
-
-```
-hget key field
-```
-
-获取 `user` 的 `name` 域（属性）对应的值，**如果键或 `field` 不存在，会返回 `nil`**：
-
-```
-127.0.0.1:6379> hget user name 
-"tom"
-
-127.0.0.1:6379> hget user age 
-(nil)
-
-127.0.0.1:6379> hget user2 name 
-(nil) 
-```
-
-删除：删除除一个或多个 `field`，**返回结果为成功删除 `field` 的个数**。
-
-```
-hdel key field [field ...]
-```
-
-删除 `user` 的 `name` 域，**如果域不存在返回0**：
-
-```
-127.0.0.1:6379> hdel user name
-(integer) 1 
-
-127.0.0.1:6379> hdel user name
-(integer) 0
-```
-
-##### 批量添加、批量获取
-
-`hmset` 和 `hmget` 分别是批量设置和获取 `field-value`，`hmset` 需要的参数是 `key` 和多对 `field-value`，`hmget` 需要的参数是 `key` 和多个 `field`。
-
-```
-hmget key field [field ...] 
-hmset key field value [field value ...]
-```
-
-批量添加、批量获取多个域值：
-
-```
-127.0.0.1:6379> hmset user name mike age 12 city tianjin 
-OK
-127.0.0.1:6379> hmget user name city 
-1) "mike" 
-2) "tianjin"
-```
-
-获取全域、获取全值
-
-获取所有 `field`：
-
-```
-hkeys key
-```
-
-获取所有的`value`：
-
-```
-hvals key
-```
-
-获取所有的 `field-value`：
-
-```
-hgetall key
-```
-
-获取 `user` 全部 `field` 和 `value` 和 `field-value`：
-
-```
-127.0.0.1:6379> hkeys user 
-1) "name" 
-2) "age" 
-3) "city"
-
-127.0.0.1:6379> hvals user 
-1) "mike" 
-2) "12" 
-3) "tianjin"
-
-127.0.0.1:6379> hgetall user 
-1) "name" 
-2) "mike" 
-3) "age" 
-4) "12" 
-5) "city" 
-6) "tianjin"
-```
-
-?> 在使用 `hgetall` 时，如果哈希元素个数比较多，会存在阻塞Redis的可能。如果开发人员只需要获取部分 `field`，可以使用 `hmget`，如果一定要获取全部 `field-value`，可以使用 `hscan` 命令，该命令会渐进式遍历哈希类型。
-
-##### 存在、统计、计算
-
-存在：判断 `field` 是否存在，**存在返回结果为1，不存在时返回0**。
-
-```
-hexists key field
-```
-
-统计：**统计 `field` 个数。**
-
-```
-hlen key
-```
-
-计算：**计算 `value` 的字符串长度。**
-
-```
-hstrlen key field
-```
-
-例如 `user` 有3个 `field`：
-
-```
-127.0.0.1:6379> hset user name tom 
-(integer) 1 
-127.0.0.1:6379> hset user age 23 
-(integer) 1 
-127.0.0.1:6379> hset user city tianjin 
-(integer) 1 
-
-127.0.0.1:6379> hexists user name 
-(integer) 1
-
-127.0.0.1:6379> hlen user 
-(integer) 3
-
-127.0.0.1:6379> hstrlen user name 
-(integer) 3
-```
-
-##### 时间复杂度、使用场景
-
-![QQ截图20200523155801](image/QQ截图20200523155801.png)
-
-用户信息存储更直观，**关系型数据库可以做复杂的关系查询，而Redis去模拟关系型复杂查询开发困难，维护成本高**。 
-
-![QQ截图20200520225028](image/QQ截图20200520225028.png)
-
-哈希类型是稀疏的，而关系型数据库是完全结构化的，例如哈希类型每个键可以有不同的`field`，而关系型数据库一旦添加新的列，所有行都要为其设置值（即使为NULL）。
-
-![QQ截图20200520225340](image/QQ截图20200520225340.png)
-
 ### 集合
 
-**集合（set）类型也是用来保存多个的字符串元素，但和列表类型不一样的是，集合中不允许有重复元素，并且集合中的元素是无序的，不能通过 索引下标获取元素。**
+**集合（`set`）类型也是用来保存多个的字符串元素，但和列表类型不一样的是，集合中不允许有重复元素，并且集合中的元素是无序的，不能通过 索引下标获取元素。**
 
 **一个集合最多可以存储2^32-1个元素。**
 
@@ -757,7 +757,7 @@ scard key
 
 ##### 集合间的操作
 
-现在有两个集合，它们分别是user1和user2：
+现在有两个集合，它们分别是 `user1` 和 `user2`：
 
 ```
 127.0.0.1:6379> sadd user1 it music his sports 
@@ -772,7 +772,7 @@ scard key
 sinter key [key ...]
 ```
 
-求user1和user2两个集合的交集：
+求 `user1` 和 `user2` 两个集合的交集：
 
 ```
 127.0.0.1:6379> sinter user1 user2 
@@ -832,7 +832,7 @@ sdiffstore destination key [key ...]
 
 ### 有序集合
 
-**有序集合：它保留了集合不能有重复成员的特性， 但不同的是，有序集合中的元素可以排序。但是它和列表使用索引下标作为排序依据不同的是，它给每个元素设置一个分数（score）作为排序的依据。**
+**有序集合（`zset`）：它保留了集合不能有重复成员的特性， 但不同的是，有序集合中的元素可以排序。但是它和列表使用索引下标作为排序依据不同的是，它给每个元素设置一个分数（score）作为排序的依据。**
 
 ![QQ截图20200523160230](image/QQ截图20200523160230.png)
 
@@ -1178,35 +1178,6 @@ OK
 (integer) 40
 ```
 
-##### 列表编码
-
-列表类型的内部编码有两种：
-
-- `ziplist`（压缩列表）：当列表的元素个数小于 `list-max-ziplist-entries` 配置（默认512个），同时列表中每个元素的值都小于 `list-max-ziplist-value` 配置时（默认64字节），Redis会选用 `ziplist` 来作为列表的内部实现来减少内存的使 用。
-- `linkedlist`（链表）：当列表类型无法满足 `ziplist` 的条件时，Redis会使用 `linkedlist` 作为列表的内部实现。
-
-当元素个数较少且没有大元素时，内部编码为 `ziplist`：
-
-```
-127.0.0.1:6379> rpush listkey e1 e2 e3 
-(integer) 3 
-127.0.0.1:6379> object encoding listkey 
-"ziplist"
-```
-
-当元素个数超过512个或者当某个元素超过64字节，内部编码变为 `linkedlist`：
-
-```
-127.0.0.1:6379> rpush listkey e4 e5 ... e512 e513 
-(integer) 513 
-127.0.0.1:6379> object encoding listkey 
-"linkedlist"
-127.0.0.1:6379> rpush listkey "one string is bigger than 64 byte..." 
-(integer) 4 
-127.0.0.1:6379> object encoding listkey
-"linkedlist"
-```
-
 ##### 哈希编码
 
 哈希类型的内部编码有两种：
@@ -1234,6 +1205,35 @@ OK
 OK
 127.0.0.1:6379> object encoding hashkey 
 "hashtable" 
+```
+
+##### 列表编码
+
+列表类型的内部编码有两种：
+
+- `ziplist`（压缩列表）：当列表的元素个数小于 `list-max-ziplist-entries` 配置（默认512个），同时列表中每个元素的值都小于 `list-max-ziplist-value` 配置时（默认64字节），Redis会选用 `ziplist` 来作为列表的内部实现来减少内存的使 用。
+- `linkedlist`（链表）：当列表类型无法满足 `ziplist` 的条件时，Redis会使用 `linkedlist` 作为列表的内部实现。
+
+当元素个数较少且没有大元素时，内部编码为 `ziplist`：
+
+```
+127.0.0.1:6379> rpush listkey e1 e2 e3 
+(integer) 3 
+127.0.0.1:6379> object encoding listkey 
+"ziplist"
+```
+
+当元素个数超过512个或者当某个元素超过64字节，内部编码变为 `linkedlist`：
+
+```
+127.0.0.1:6379> rpush listkey e4 e5 ... e512 e513 
+(integer) 513 
+127.0.0.1:6379> object encoding listkey 
+"linkedlist"
+127.0.0.1:6379> rpush listkey "one string is bigger than 64 byte..." 
+(integer) 4 
+127.0.0.1:6379> object encoding listkey
+"linkedlist"
 ```
 
 ##### 集合编码
