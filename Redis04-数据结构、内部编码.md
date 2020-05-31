@@ -623,15 +623,7 @@ brpop key [key ...] timeout
 
 ![QQ截图20200523165734](image/QQ截图20200523165734.png)
 
-**列表比较典型的使用场景就是消息队列。**
-
-**阻塞式消息队列**：Redis的 `lpush+brpop` 命令组合即可实现阻塞队列，生产者客户端使用 `lpush` 从列表左侧插入元素，多个消费者客户端使用 `brpop` 命令阻塞式的“抢”列表尾部的元素，多个客户端保证了消费的负载均衡和高可用性。
-
-![QQ截图20200523143510](image/QQ截图20200523143510.png)
-
-**可靠式消息队列**：使用两个列表，一个列表存储待处理元素，一个列表存储处理中元素，通过Redis的 `rpoplpush` 命令将一个列表的待处理元素移动至另一个列表变成处理中元素，最后再通过 `lrem` 命令删除处理中的元素，保证元素处理过程中的不丢失。
-
-?> 实际上列表的使用场景很多，在选择时可以参考以下口诀：`lpush+lpop=Stack（栈）` 、`lpush+rpop=Queue（队列）`、`lpush+ltrim=Capped Collection（有限集合）` 、`lpush+brpop=Message Queue（消息队列）`。
+**列表比较典型的使用场景就是消息队列。**使用 `rpush` 和 `lpush` 操作入队列，`lpop` 和 `rpop` 操作出队列。实际上列表的使用场景很多，在选择时可以参考以下口诀：`lpush+lpop=Stack（栈）` 、`lpush+rpop=Queue（队列）`、`lpush+ltrim=Capped Collection（有限集合）` 、`lpush+brpop=Message Queue（消息队列）`。
 
 ### 集合
 
