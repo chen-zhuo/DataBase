@@ -14,4 +14,5 @@
   - [Redis04-数据结构、内部编码](Redis04-数据结构、内部编码.md)
   - [Redis05-实用功能、Lua脚本](Redis05-实用功能、Lua脚本.md)
   - [Redis06-消息队列](Redis06-消息队列.md)
+  - [Redis07-客户端管理](Redis07-客户端管理.md)
 
