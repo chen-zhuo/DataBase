@@ -447,7 +447,7 @@ lpush key value [value ...]
 (integer) 3
 ```
 
-位置添加：**`linsert` 命令会从列表中找到等于 `pivot` 的元素，在其前（before）或者后（after）插入一个新的元素 `value`。**
+位置添加：`linsert` 命令会从列表中找到等于 `pivot` 的元素，在其前（before）或者后（after）插入一个新的元素 `value`。
 
 ```
 linsert key before|after pivot value

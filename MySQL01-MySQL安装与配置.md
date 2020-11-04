@@ -263,10 +263,10 @@ Start the MySQL Server at System Startup选项为开机自启，可以不勾选
 
 ##### MySQL终端
 
-以“管理员模式”启动命令行，输入`net start mysql实例的名字`，回车启动MySQL服务
+以“管理员模式”启动命令行，输入 `net start mysql实例的名字`，回车启动MySQL服务
 
 ![QQ截图20200321145302](image/QQ截图20200321145302.png)
 
-输入`mysql -u root -p` 回车，在输入安装MySQL时配置的密码，回车，进入MySQL
+输入 `mysql -u root -p` 回车，在输入安装MySQL时配置的密码，回车，进入MySQL
 
 ![QQ截图20200321145316](image/QQ截图20200321145316.png)
