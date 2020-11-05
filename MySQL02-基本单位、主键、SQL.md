@@ -220,15 +220,15 @@ SQL由很少的词构成，目的是提供一种从数据库中读写数据的�
 
 SQL语言主要由五类语言组成：
 
-**数据定义语言(DDL)**，例如：CREATE、DROP、ALTER等语句。
+数据定义语言(DDL)，例如：CREATE、DROP、ALTER等语句。
 
-**数据操作语言(DML)**，例如：INSERT、UPDATE、DELETE。
+数据操作语言(DML)，例如：INSERT、UPDATE、DELETE。
 
-**数据查询语言(DQL)**，例如：SELECT语句。
+数据查询语言(DQL)，例如：SELECT语句。
 
-**数据控制语言(DCL)**，例如：GRANT、REVOKE。
+数据控制语言(DCL)，例如：GRANT、REVOKE。
 
-**数据事务语言(DTL)**，例如：BEGIN、COMMIT、ROLLBACK等语句
+数据事务语言(DTL)，例如：BEGIN、COMMIT、ROLLBACK等语句
 
 ##### SQL的执行顺序
 
