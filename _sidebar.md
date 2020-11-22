@@ -1,5 +1,4 @@
 - DataBase目录
-  - [首页-数据库基础](README.md)
   - [MySQL01-MySQL安装与配置](MySQL01-MySQL安装与配置.md)
   - [MySQL02-基本单位、主键、SQL](MySQL02-基本单位、主键、SQL.md)
   - [MySQL03-连接、查看与选择、退出](MySQL03-连接、查看与选择、退出.md)
