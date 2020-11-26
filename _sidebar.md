@@ -7,8 +7,8 @@
   - [MySQL06-数据导入、数据准备](MySQL06-数据导入、数据准备.md)
   - [MySQL07-DQL语言：基础查询](MySQL07-DQL语言：基础查询.md)
   - [MySQL08-DQL语言：条件查询](MySQL08-DQL语言：条件查询.md)
+  - [MySQL09-DQL语言：排序查询](MySQL09-DQL语言：排序查询.md)
   - [MySQL100-联结表](MySQL100-联结表.md)
-  - [MySQL75-比较、判断、连接条件](MySQL75-比较、判断、连接条件.md)
   - [MySQL81-子查询、模糊查询、正则](MySQL81-子查询、模糊查询、正则.md)
   - [MySQL90-汇总数据、分组数据](MySQL90-汇总数据、分组数据.md)
   - [MySQL95-文本处理、时间日期、数值](MySQL95-文本处理、时间日期、数值.md)
@@ -19,4 +19,5 @@
   - [Redis05-实用功能、Lua脚本](Redis05-实用功能、Lua脚本.md)
   - [Redis06-消息队列](Redis06-消息队列.md)
   - [Redis07-客户端管理](Redis07-客户端管理.md)
+
 
