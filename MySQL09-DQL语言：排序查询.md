@@ -10,7 +10,9 @@
 	【WHERE 筛选条件】
 	ORDER BY 排序列表 【ASC|DESC】
 特点：
-	1.ASC代表升序，DESC代表降序。如果都不写，默认代表升序
+	1.ASC代表升序，DESC代表降序。如果都不写，默认代表升序。
+	2.OREDER BY子句中可以支持单个字段、多个字段、表达式、函数、别名
+	3.ORDER BY子句一般是放在查询语句的最后面，LIMIT子句除外。
 */
 ```
 
@@ -117,9 +119,41 @@ FROM
 	employees
 ORDER BY
 	salary * 12 * (1 + IFNULL(commission_pct, 0)) DESC;
+
+-- ORDER BY 同样支持使用别名排序，上面语句重写为
+SELECT
+	*, salary * 12 * (1 + IFNULL(commission_pct, 0)) 年薪
+FROM
+	employees
+ORDER BY
+	年薪 DESC;
 ```
 
 ![QQ截图20201127003018](image/QQ截图20201127003018.png)
+
+##### 函数排序
+
+`LENGTH(字段值)`：获取该字段的长度函数。
+
+```sql
+-- 按姓名的长度降序显示员工的姓名和工资
+SELECT
+	LENGTH(last_name) 姓名长度, last_name, salary
+FROM
+	employees
+ORDER BY
+	姓名长度 DESC;
+```
+
+![QQ截图20201129002451](image/QQ截图20201129002451.png)
+
+
+
+
+
+
+
+
 
 
 
