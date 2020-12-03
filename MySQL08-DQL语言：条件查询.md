@@ -193,7 +193,7 @@ SELECT * FROM 表名 WHERE 字段名 LIKE '_\___\%';
 SELECT * FROM 表名 WHERE 字段名 LIKE '_$___$%' ESCAPE '$';
 ```
 
-##### `BETWEEN AND`
+##### `(NOT) BETWEEN AND`
 
 `BETWEEN` 的后面跟2个临界值，临界值之间必须用 `AND` 符连接。
 
@@ -213,8 +213,6 @@ WHERE
 
 ![QQ截图20201126000505](image/QQ截图20201126000505.png)
 
-##### `NOT BETWEEN AND`
-
 ```sql
 -- 查询员工编号不在100到120之间的员工信息
 SELECT
@@ -227,7 +225,7 @@ WHERE
 
 ![QQ截图20201129003211](image/QQ截图20201129003211.png)
 
-##### `IN`
+##### `(NOT) IN`
 
 `IN` 判断某字段的值是否属于 `IN` 列表中的某一项。
 
@@ -247,8 +245,6 @@ WHERE
 
 ![QQ截图20201126225927](image/QQ截图20201126225927.png)
 
-##### `NOT IN`
-
 `NOT IN` 判断某字段的值是否不属于 `IN` 列表中的某一项。
 
 ```sql
@@ -264,7 +260,7 @@ WHERE
 
 ![QQ截图20201126232234](image/QQ截图20201126232234.png)
 
-##### `IS NULL`
+##### `IS (NOT) NULL`
 
 `IS NULL` 判断值是否为NULL值。
 
@@ -282,8 +278,6 @@ WHERE
 ```
 
 ![QQ截图20201126230537](image/QQ截图20201126230537.png)
-
-##### `IS NOT NULL`
 
 `IS NOT NULL` 判断值是否不为NULL值。
 

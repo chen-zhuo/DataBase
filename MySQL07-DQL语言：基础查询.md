@@ -24,7 +24,7 @@ SELECT 查询列表 FROM 表名;
 !> 注意：**查询时，要在表所在的数据库中查询。如果查询的表在其他数据库，需要先指定数据库 `USE 数据库名;`**
 
 ```sql
--- 因为Nactive默认指定了表所在的数据库，就不用再次指定数据库了
+-- 因为Navicat默认指定了表所在的数据库，就不用再次指定数据库了
 SELECT last_name FROM employees;
 ```
 
@@ -37,7 +37,7 @@ SELECT last_name FROM employees;
 !> 注意：**查询时，要在表所在的数据库中查询。如果查询的表在其他数据库，需要先指定数据库 `USE 数据库名;`**
 
 ```sql
--- 因为Nactive默认指定了表所在的数据库，就不用再次指定数据库了
+-- 因为Navicat默认指定了表所在的数据库，就不用再次指定数据库了
 SELECT
 	last_name,
 	salary,
