@@ -1,4 +1,4 @@
-# DQL：基础查询、别名、处理
+# DQL语言：基础查询
 
 DQL语言：即数据查询语言，主要作用是查询检索数据库中的数据的SQL语言。
 
@@ -159,7 +159,7 @@ FROM
 
 ![QQ截图20201122235603](image/QQ截图20201122235603.png)
 
-### 处理
+### 限制去重
 
 ##### LIMIT限制
 
@@ -219,47 +219,3 @@ FROM
 
 ![QQ截图20201123000043](image/QQ截图20201123000043.png)
 
-##### CONCAT联结
-
-`CONCAT()` 函数：**常用函数，作用是将多个值联结到一起构成单个值。**
-
-```sql
--- 查询员工名和姓连接成一个字段
-SELECT
-	CONCAT(last_name, first_name)
-FROM
-	employees;
-```
-
-![QQ截图20201123234143](image/QQ截图20201123234143.png)
-
-中间还可以增加字符，按照一定的格式输出，顺便起别名：
-
-```sql
-SELECT
-	CONCAT(
-		last_name,
-		'[',
-		first_name,
-		']'
-	) 姓名
-FROM
-	employees;
-```
-
-![QQ截图20201123234521](image/QQ截图20201123234521.png)
-
-##### IFUNLL判断
-
-`IFUNLL(字段, 默认值)`函数：**常用函数，作用是判断值是否为NULL，为NULL返回默认值。**
-
-```sql
--- 把奖金率为NULL的值转换为数值０
-SELECT
-	commission_pct 转换前,
-	IFNULL(commission_pct, 0) 转换后
-FROM
-	employees;
-```
-
-![QQ截图20201123235932](image/QQ截图20201123235932.png)

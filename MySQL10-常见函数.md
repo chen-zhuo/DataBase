@@ -39,13 +39,30 @@ SELECT LENGTH('张三丰hahaha');
 `CONCAT(字符串1, 字符串2...)`：将多个字符串拼接为一个字符串输出。
 
 ```sql
+-- 查询员工名和姓连接成一个字段
 SELECT
-	CONCAT(last_name, '_', first_name) 姓名
+	CONCAT(last_name, first_name)
 FROM
 	employees;
 ```
 
-![QQ截图20201129005548](image/QQ截图20201129005548.png)
+![QQ截图20201123234143](image/QQ截图20201123234143.png)
+
+中间还可以增加字符，按照一定的格式输出，顺便起别名：
+
+```sql
+SELECT
+	CONCAT(
+		last_name,
+		'[',
+		first_name,
+		']'
+	) 姓名
+FROM
+	employees;
+```
+
+![QQ截图20201123234521](image/QQ截图20201123234521.png)
 
 ##### 大写小写
 
@@ -415,6 +432,21 @@ SELECT IF(NULL is NULL, '是', '不是');
 -- 下面输出：'不等于'（NULL与任何值都不相等，包括其本身）
 SELECT IF(NULL = NULL, '等于', '不等于');
 ```
+
+##### IFUNLL函数
+
+`IFUNLL(字段, 默认值)`函数：**常用函数，作用是判断值是否为NULL，为NULL返回默认值。**
+
+```sql
+-- 把奖金率为NULL的值转换为数值０
+SELECT
+	commission_pct 转换前,
+	IFNULL(commission_pct, 0) 转换后
+FROM
+	employees;
+```
+
+![QQ截图20201123235932](image/QQ截图20201123235932.png)
 
 ##### CASE函数
 
