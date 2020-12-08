@@ -10,6 +10,7 @@
   - [MySQL09-DQL语言：分组排序](MySQL09-DQL语言：分组排序.md)
   - [MySQL10-常见函数](MySQL10-常见函数.md)
   - [MySQL11-DQL语言：连接查询](MySQL11-DQL语言：连接查询.md)
+  - [MySQL12-DQL语言：子查询](MySQL12-DQL语言：子查询.md)
   - [Redis01-Redis简介与安装](Redis01-Redis简介与安装.md)
   - [Redis02-启动、连接、配置、关闭](Redis02-启动、连接、配置、关闭.md)
   - [Redis03-单线程架构、库、通用命令](Redis03-单线程架构、库、通用命令.md)
