@@ -161,13 +161,17 @@ FROM
 
 ### 限制去重
 
-##### LIMIT限制
+##### LIMIT分页
 
-LIMIT用于限制查询结果返回的数量。
+LIMIT用于分页限制查询结果返回的数量。
+
+应用场景：当要显示的数据，一页显示不全，需要分页提交SQL请求。
 
 返回结果前m行数据：`SELECT 字段名称 FROM 通用认证信息 LIMIT m;`
 
 返回结果第m行后n行数据：`SELECT 字段名称 FROM 通用认证信息 LIMIT m,n;`
+
+!> 注意：LIMIT位置始终在查询语句的末尾。
 
 ```sql
 /*
@@ -202,6 +206,14 @@ SELECT id, 公司名称 FROM 通用认证信息 LIMIT 1,2;
 |  3 | 小红公司     |
 +----+--------------+
 2 rows in set (0.00 sec)
+*/
+
+-- 如果每页的查询条数固定，我们可以总结出查询公式
+/*
+显示的页数：page，每页的条目数：size
+SELECT 查询列表
+FROM 表名
+LIMIT (page-1)*size,size;
 */
 ```
 
