@@ -1,6 +1,6 @@
 # DQL语言：基础查询
 
-DQL语言：即数据查询语言，主要作用是查询检索数据库中的数据的SQL语言。
+**DQL语言：即数据查询语言，主要作用是查询检索数据库中的数据的SQL语言。**
 
 ### 语法特点
 
@@ -159,9 +159,27 @@ FROM
 
 ![QQ截图20201122235603](image/QQ截图20201122235603.png)
 
-### 限制去重
 
-##### LIMIT分页
+
+### 去重分页联合
+
+##### DISTINCT去重查询
+
+去重检索表中的单个列：`SELECT DISTINCT 字段名称 FROM 表名;`
+
+```sql
+-- 查询员工表中涉及到的所有的部门编号
+SELECT DISTINCT
+	department_id
+FROM
+	employees;
+```
+
+![QQ截图20201123000043](image/QQ截图20201123000043.png)
+
+
+
+##### LIMIT分页查询
 
 LIMIT用于分页限制查询结果返回的数量。
 
@@ -217,17 +235,32 @@ LIMIT (page-1)*size,size;
 */
 ```
 
-##### DISTINCT去重
-
-去重检索表中的单个列：`SELECT DISTINCT 字段名称 FROM 表名;`
+##### UNION联合查询
 
 ```sql
--- 查询员工表中涉及到的所有的部门编号
-SELECT DISTINCT
-	department_id
-FROM
-	employees;
+/*
+UNION联合查询：将多条查询语句的结果合并成一个结果。
+语法：
+    查询语句1
+    UNION
+    查询语句2
+    UNION
+    ...
+应用场景：
+    要查询的结果来自多个表，且多个表没有直接的连接关系，但查询的信息一致时，可以使用联合查询。
+特点：
+   1、要求多条查询语句的查询列数是一致的
+   2、要求多条查询语句的查询的每一列的类型和顺序最好一致
+   3、UNION关键字默认去重，如果使用UNION ALL可以包含重复项
+*/
 ```
 
-![QQ截图20201123000043](image/QQ截图20201123000043.png)
+```sql
+-- 查询部门编号大于90或邮箱中包含a的员工信息
+SELECT * FROM employees WHERE department_id>90
+UNION
+SELECT * FROM employees WHERE email LIKE '%a%';
+```
+
+![QQ截图20201213151246](image/QQ截图20201213151246.png)
 
