@@ -141,7 +141,7 @@ WHERE bo.boyName='张无忌';
       WHERE 筛选条件;
 
 方式二：TRUNCATE清空
-语法：TRUNCATE 【TABLE】 表名;
+语法：TRUNCATE TABLE 表名;
 特点：清空表中所有数据
 
 方式一和方式二区别：
@@ -193,7 +193,7 @@ WHERE bo.boyName='黄晓明';
 
 ```sql
 -- 拷贝boys表生成新的boys_copy表，清空该表
-TRUNCATE boys_copy;
+TRUNCATE TABLE boys_copy;
 ```
 
 ![QQ截图20201213174701](image/QQ截图20201213174701.png)
