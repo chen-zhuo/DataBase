@@ -300,3 +300,13 @@ CREATE TABLE author_copy4 SELECT au_name,nation FROM author WHERE 0;
 ```
 
 ![QQ截图20201214233217](image/QQ截图20201214233217.png)
+
+```sql
+-- 将myemployees库的employees表的表结构和表数据复制到books库中
+CREATE TABLE author_copy5 SELECT
+	*
+FROM
+	myemployees.employees;
+```
+
+![QQ截图20201216233420](image/QQ截图20201216233420.png)
