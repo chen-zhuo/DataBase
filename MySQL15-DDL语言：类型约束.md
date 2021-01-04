@@ -54,7 +54,7 @@ SET：“位”是创建有序元素集合的一种简单而有效的方式。�
 
 ENUM：在系统内部可以存储为数字，并且从1开始用数字做索引。ENUM 类型因为只允许在集合中取得一个值，类似于单选项，即相互排拆的数据，比如性别。一个 ENUM 类型最多可以包含 65536 个元素，其中一个元素被 MySQL 保留，用来存储错误信息，这个错误值用索引 0 或者一个空字符串表示。ENUM 类型字段可以从集合中取得一个值或使用null值，除此之外的输入将会使 MySQL 在这个字段中插入一个空字符串。MySQL 认为 ENUM 类型集合中出现的值是合法输入，除此之外其它任何输入都将失败。这说明通过搜索包含空字符串或对应数字索引为 0 的行就可以很容易地找到错误记录的位置。ENUM 类型字段插入值的大小写与集合中值的大小写不匹配，MySQL会自动使用插入值的大小写转换成与集合中大小写一致的值。
 
-##### 字段约束
+##### 字段约束说明
 
 **字段约束：字段还可以设置约束条件，例如有的字段不能为空。**
 
@@ -70,7 +70,7 @@ ENUM：在系统内部可以存储为数字，并且从1开始用数字做索引
 
 **ZEROFILL**(0填充)：**可以用来增补输出的值。使用这个修饰符可以阻止 MySQL 数据库存储负值。创建时在整型字段语句后接上：ZEROFILL**。
 
-### 数值型
+### 字段类型
 
 ##### 整形
 
@@ -248,3 +248,102 @@ INSERT INTO tab_set VALUES('a'); -- 成功插入值'a'
 INSERT INTO tab_set VALUES('A'); -- 成功插入值'a'（不区分大小写）
 INSERT INTO tab_set VALUES('a,c'); -- 成功在同一字段同一记录中插入值'a,c'
 ```
+
+### 字段约束
+
+##### 字段约束简介
+
+```sql
+/*
+作用：一种用于限制表中的数据规则，为了保证表中的数据的准确性和可靠性。
+
+分类：六大约束
+  NOT NULL：非空，保证该字段的值不能为空（例如：姓名）
+  DEFAULT：默认值，保证该字段有默认值（例如：性别）
+  PRIMARY KEY：主键，保证该字段的值具有唯一性，并且非空（例如：学号）
+  UNIQUE：唯一，保证该字段的值具有唯一性，可以为空（例如：座位号）
+  CHECK：检查约束【MySQL中不支持】（比如：年龄）
+  FOREIGN KEY：外键，用于限制两个表的关系，保证该字段的值必须来自于主表的关联列的值，在从表添加外键约束，用于引用主表中某列的值
+
+主键和唯一的区别：
+      唯一性   允许空值   允许多个     允许组合使用
+主键    是       否      最多一个     可以，不推荐
+唯一    是       是      可以多个     可以，不推荐
+
+添加约束：
+  1.创建表时
+  2.修改表时
+
+约束的添加分类：
+  列级约束：
+    六大约束语法上都支持，但外键约束没有效果
+  表级约束：
+    除了非空、默认，其他的都支持
+*/
+```
+
+##### 添加约束
+
+```sql
+/*
+建表添加约束：
+语法：直接在字段名和类型后面追加约束类型即可。
+只支持：默认、非空、主键、唯一
+不支持：外键
+
+添加表级约束：
+语法：在各个字段的最下面对字段名添加约束。
+CONSTRAINT 约束名 约束类型(字段名)
+注意：约束名就是为约束起别名，约束名不能重复。
+注意：主键其约束名无效
+*/
+```
+
+建表添加约束：
+
+```sql
+CREATE TABLE IF NOT EXISTS major(
+  id INT PRIMARY KEY,
+  majorname VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS stuinfo(
+  id INT PRIMARY KEY, -- 主键
+  stuname VARCHAR(20) NOT NULL, -- 非空
+  gender CHAR(1) CHECK(gender='男' OR gender='女'), -- 检查
+  seat INT UNIQUE, -- 唯一
+  age INT DEFAULT 18, -- 默认
+  majorid INT REFERENCES major(id) -- 外键（这里不支持）
+);
+```
+
+添加表级约束：
+
+```sql
+CREATE TABLE IF NOT EXISTS stuinfo(
+  id INT,
+  id2 INT,
+  stuname VARCHAR(20) NOT NULL,
+  gender CHAR(1),
+  seat INT,
+  age INT,
+  majorid INT,
+    
+  CONSTRAINT pk PRIMARY KEY(id, id2), -- 联合主键
+  CONSTRAINT uq UNIQUE(seat), -- 唯一键
+  CONSTRAINT ck CHECK(gender='男' OR gender='女'), -- 检查
+  CONSTRAINT fk_stuinfo_major FOREIGN KEY(majorid) REFERENCES major(id) -- 外键
+);
+```
+
+##### 外键
+
+```sql
+/*
+1、要求在从表设置外键关系
+2、从表的外键列的类型和主表的关联列的类型要求一致或兼容，名称无要求
+3、主表的关联列必须是一个key（一般是主键或唯一）
+4、插入数据时，先插入主表，在插入从表；删除数据时，先删除从表，在删除主表
+*/
+```
+
