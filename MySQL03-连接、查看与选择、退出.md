@@ -94,7 +94,7 @@ mysql> SHOW DATABASES;
 | 示例     | `USE test;`    |
 | 示例说明 | 使用数据库test |
 
-!> 注意：**被选择的数据一定要是存在的。**
+!> 注意：**被选择的数据库一定要是存在的。**
 
 ```sql
 -- 选择存在的数据库
@@ -201,7 +201,7 @@ mysql> SHOW TABLES FROM lb;
 | 示例     | `desc user;`       |
 | 示例说明 | 查看user表的表结构 |
 
-注意：**查看表结构之前一定要选中存在的数据库，而且表已经是存在的。**
+!> 注意：**查看表结构之前一定要选中存在的数据库，而且表已经是存在的。**
 
 ```sql
 mysql> SHOW COLUMNS FROM 通用认证信息;
@@ -242,8 +242,6 @@ SHOW ERRORS和SHOW WARNINGS，用来显示服务器错误或警告消息。
 
 退出MySQL命令：`exit` 或 `quit`
 
-注意：**退出命令后面可以没有 `;`**。
-
 ```sql
 mysql> exit
 /*
@@ -251,3 +249,5 @@ mysql> exit
 Bye
 */
 ```
+
+!> 注意：退出命令后面可以没有 `;`。
