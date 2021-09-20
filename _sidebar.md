@@ -13,6 +13,7 @@
   - [MySQL12-DQL语言：子查询](MySQL12-DQL语言：子查询.md)
   - [MySQL13-DML语言：插入修改删除](MySQL13-DML语言：插入修改删除.md)
   - [MySQL14-DDL语言：库表管理](MySQL14-DDL语言：库表管理.md)
+  - [MySQL15-DDL语言：类型约束](MySQL15-DDL语言：类型约束.md)
   - [Redis01-Redis简介与安装](Redis01-Redis简介与安装.md)
   - [Redis02-启动、连接、配置、关闭](Redis02-启动、连接、配置、关闭.md)
   - [Redis03-单线程架构、库、通用命令](Redis03-单线程架构、库、通用命令.md)
