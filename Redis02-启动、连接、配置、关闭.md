@@ -1,18 +1,18 @@
 # 启动、连接、配置、关闭
 
-Redis的安装文件如下：
+Redis的安装文件如下：**Redis的配置文件在Linux系统下名称是 `redis.conf`，在Windows系统下配置文件名称是 `redis.windows.conf`。**
 
-![QQ截图20200517020314](image/QQ截图20200517020314.png)
+![QQ截图20200517023357](image/QQ截图20200517023357.png)
 
 Redis开头可执行文件，称之为Redis Shell，这些可执行文件可以做很多事情，例如：启动和停止Redis、检测和修复Redis的持久化文件，还可以检测Redis的性能。
 
 ![QQ截图20200517020627](image/QQ截图20200517020627.png)
 
-### 启动
+## 启动
 
-有三种方法启动Redis：默认启动、配置启动、文件启动。
+有四种方法启动Redis：默认启动、配置启动、文件启动、后台启动。
 
-##### 默认启动
+### 默认启动
 
 在命令行输入下面命令采用默认配置来启动Redis：
 
@@ -22,19 +22,21 @@ redis-server
 
 ![QQ截图20200517020951](image/QQ截图20200517020951.png)
 
-可以看到直接使用redis-server启动Redis后，会打印出一些日志，通过日志可以看到一些信息：
+可以看到启动Redis后，会打印出一些日志信息：
 
+```
 1. 当前的Redis版本的是3.2.100
 2. Redis的默认端口是6379
 3. 进程ID是33644
+```
 
 !> 因为直接启动无法自定义配置，所以这种方式是不会在生产环境中使用的。
 
-##### 配置启动
+### 配置启动
 
 redis-server加上要修改配置名和值（可以是多对），没有设置的配置将使用默认配置。
 
-例如，如果要用6380作为端口启动Redis，那么可以执行：
+例如，用6380作为端口启动Redis，那么可以执行：
 
 ```
 redis-server --port 6380
@@ -44,19 +46,11 @@ redis-server --port 6380
 
 !> 虽然运行配置可以自定义配置，但是如果需要修改的配置较多或者希望将配置保存到文件中，不建议使用这种方式。
 
-##### 文件启动
+### 文件启动
 
 第一种启动方式的界面有一行提示：`没有读配置文件redis.conf`
 
-```
-# Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
-```
-
 ![20190119141418819](image/20190119141418819.png)
-
-**Redis的配置文件 `redis.conf` 是在Linux系统下名称，在Windows系统下配置文件名称就是 `redis.windows.conf`。**
-
-![QQ截图20200517023357](image/QQ截图20200517023357.png)
 
 将配置写到指定文件里，例如我们将配置写到了 `redis.windows.conf` 中，那么只需要执行如下命令即可启动Redis：
 
@@ -68,15 +62,31 @@ redis-server "路径\redis.windows.conf"
 
 ![20190119140700561](image/20190119140700561.png)
 
+### 后台启动
+
+运行起了 `redis-server` 后就没有办法在这个窗口下做任何操作了，因为这个时候使用Ctrl+C就直接退出了：
+
+![20160805094245027](image/20160805094245027.png)
+
+这时我们可以修改redis的配置文件，将daemonize后面的no改为yes（即后台运行或者叫守护进程方式运行），再通过配置文件启动redis即可：
+
+Windows不支持daemonize即后台运行：
+
+![QQ截图20211024215035](image/QQ截图20211024215035.png)
+
+Linux支持daemonize即后台运行：
+
+![QQ截图20211024215125](image/QQ截图20211024215125.png)
+
 Redis有60多个配置，这里只给出一些重要的配置：
 
 ![QQ截图20200517022440](image/QQ截图20200517022440.png)
 
 ?> 假如一台机器上启动多个Redis，通过配置文件启动的方式提供了更大的灵活性，所以大部分生产环境会使用这种方式启动Redis。
 
-### 连接
+## 连接
 
-##### 交互式方式
+### 交互式方式
 
 现在我们已经启动了Redis服务，**后面要确保Redis服务的窗口一直处于运行状态（不关闭状态），否则后面的操作将无效**，接下来使用 `redis-cli` 连接Redis服务器。
 
@@ -95,7 +105,7 @@ redis-cli -h 127.0.0.1 -p 6379 -a password
 
 ![QQ截图20200517025015](image/QQ截图20200517025015.png)
 
-##### 通信测试
+### 通信测试
 
  PING命令：通常用于测试与服务器的连接是否仍然生效，或者用于测量延迟值。
 
@@ -106,9 +116,9 @@ redis-cli -h 127.0.0.1 -p 6379 -a password
 PONG
 ```
 
-### 配置
+## 配置
 
-##### 设置密码
+### 设置密码
 
 设置redis的密码：
 
@@ -186,7 +196,7 @@ OK
 1) "a"
 ```
 
-##### redis-server参数
+### redis-server参数
 
 - **redis-server--test-memory可以用来检测当前操作系统能否稳定地分配指定容量的内存给Redis，通过这种检测可以有效避免因为内存问题造成Redis崩溃。**
 
@@ -208,7 +218,7 @@ Please if you are still in doubt use the following two tools:
 
 ?> 通常无需每次开启Redis实例时都执行--test-memory选项，该功能更偏向于调试和测试，例如，想快速占满机器内存做一些极端条件的测试，这个功能是一个不错的选择。 
 
-##### redis-cli参数
+### redis-cli参数
 
 redis-cli还有其他的一些参数：
 
@@ -354,7 +364,7 @@ $redis-cli --raw get hello
 你好
 ```
 
-##### redis-benchmark参数
+### redis-benchmark参数
 
 redis-benchmark可以为Redis做基准性能测试，它提供了很多选项帮助开发和运维人员测试Redis的相关性能。
 
@@ -395,7 +405,7 @@ redis-benchmark -t get,set --csv
 "GET","79051.38"
 ```
 
-### 关闭
+## 关闭
 
 Redis提供了shutdown命令来停止Redis服务。
 
