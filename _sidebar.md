@@ -19,6 +19,6 @@
   - [Redis02-配置、启动、交互、关闭](Redis02-配置、启动、交互、关闭.md)
   - [Redis03-可视化工具、库、键命令](Redis03-可视化工具、库、键命令.md)
   - [Redis04-五种数据结构、内部编码](Redis04-五种数据结构、内部编码.md)
-  - [Redis05-实用功能、Lua脚本](Redis05-实用功能、Lua脚本.md)
-  - [Redis06-消息队列](Redis06-消息队列.md)
+  - [Redis05-管道、事务、消息队列](Redis05-管道、事务、消息队列.md)
   - [Redis07-客户端管理](Redis07-客户端管理.md)
+  - [Redis10-实用功能、Lua脚本](Redis10-实用功能、Lua脚本.md)
