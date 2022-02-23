@@ -240,37 +240,41 @@ redis-cli还有其他的一些参数：
   
 - **--rdb选项会请求Redis实例生成并发送RDB持久化文件，保存在本地。可使用它做持久化文件的定期备份。**
 
-- **--pipe选项用于将命令封装成Redis通信协议定义的数据格式，批量发送给Redis执行。**
+- **--pipe选项用于将命令封装成Redis通信协议定义的数据格式，批量发送给Redis执行，实际上就是使用Pipeline管道机制，但大部分开发人员更倾向于使用高级语言客户端中的Pipeline。**例如下面操作将 `set hello world` 和 `incr counter` 两条命令组装：
+
+  ```
+  echo -en '*3\r\n$3\r\nSET\r\n$5\r\nhello\r\n$5\r\nworld\r\n*2\r\n$4\r\nincr\r\ n$7\r\ncounter\r\n' | redis-cli --pipe
+  ```
+
+
+Redis客户端执行一条命令分为如下四个过程： 
+
+![QQ截图20200525231507](image/QQ截图20200525231507.png)
+
+其中过程1和过程4称为Round Trip Time（RTT，往返时间）。例如，要执行n条命令，需要消耗n次RTT。
+
+![QQ截图20200527232341](image/QQ截图20200527232341.png)
+
+**Pipeline（流水线）机制能改善上面这类问题，它能将一组Redis命令进 行组装，通过一次RTT传输给Redis，再将这组Redis命令的执行结果按顺序返回给客户端。**
+
+![QQ截图20200527232442](image/QQ截图20200527232442.png)
+
+在不同网络环境下非Pipeline和Pipeline执行10000次 `set` 操作的效果，可以得到如下两个结论：
+
+1. Pipeline执行速度一般比逐条执行要快。
+2. 客户端和服务端的网络延时越大，Pipeline的效果越明显。 
+
+![QQ截图20200527232824](image/QQ截图20200527232824.png)
+
+Pipeline与原生批量命令的区别：
+
+1. 原生批量命令是原子的，Pipeline是非原子的。
+2. 原生批量命令是一个命令对应多个key，Pipeline支持多个命令。
+3. **原生批量命令是Redis服务端支持实现的，而Pipeline需要服务端和客户端的共同实现。**
+
+!> 注意：Pipeline虽然好用，但是每次Pipeline组装的命令个数不能没有节制，否则一次组装Pipeline数据量过大，一方面会增加客户端的等待时间，另一方面会造成一定的网络阻塞，可以将一次包含大量命令的Pipeline拆分成多次较小的Pipeline来完成。
 
 - **--bigkeys选项使用scan命令对Redis的键进行采样，从中找到内存占用比较大的键值，这些键可能是系统的瓶颈。**
-
-- **--eval选项用于执行指定Lua脚本。**
-
-- **--latency选项可以测试客户端到目标Redis的网络延迟**，客户端B和Redis在机房B，客户端A在机房A，机房A和机房B是跨地区的：
-
-![QQ截图20200526232948](image/QQ截图20200526232948.png)
-
-客户端B：
-
-```
-redis-cli -h {machineB} --latency 
-min: 0, max: 1, avg: 0.07 (4211 samples)
-```
-
-客户端A：可以看到客户端A由于距离Redis比较远，平均网络延迟会稍微高一些。
-
-```
-redis-cli -h {machineB} --latency 
-min: 0, max: 2, avg: 1.04 (2096 samples)
-```
-
-- **--latency-history 选项以分时段每15秒输出一次延迟信息**：
-
-```
-redis-cli -h 10.10.xx.xx --latency-history 
-min: 0, max: 1, avg: 0.28 (1330 samples) -- 15.01 seconds range… 
-min: 0, max: 1, avg: 0.05 (1364 samples) -- 15.01 seconds range
-```
 
 - **--stat选项可以实时获取Redis的重要统计信息**：
 
@@ -286,59 +290,172 @@ keys mem clients blocked requests connections
 - **--no-raw选项返回原始格式的结果，--raw选项返回格式化后的结果。**
 
 ```
-redis-cli set hello "你好" 
+redis-cli set hello "你好"
 OK
 
-redis-cli get hello 
-"\xe4\xbd\xa0\xe5\xa5\xbd" 
+redis-cli get hello
+"\xe4\xbd\xa0\xe5\xa5\xbd"
 
-redis-cli --no-raw get hello 
+redis-cli --no-raw get hello
 "\xe4\xbd\xa0\xe5\xa5\xbd"
 
 redis-cli --raw get hello
 你好
 ```
 
-### redis-benchmark参数
+- **--eval选项用于执行指定Lua脚本。**Lua脚本功能为Redis开发和运维人员带来如下三个好处： 
+  - **Lua脚本在Redis中是原子执行的，执行过程中间不会插入其他命令。** 
+  - **Lua脚本可以帮助开发和运维人员创造出自己定制的命令，并可以将这些命令常驻在Redis内存中，实现复用的效果。** 
+  - **Lua脚本可以将多条命令一次性打包，有效地减少网络开销。**
 
-redis-benchmark可以为Redis做基准性能测试，它提供了很多选项帮助开发和运维人员测试Redis的相关性能。
+Lua语言是在1993年由巴西一个大学研究小组发明，其设计目标是作为嵌入式程序移植到其他应用程序，**它是由C语言实现的**，虽然简单小巧但是功能强大，所以许多应用都选用它作为脚本语言，尤其是在游戏领域，例如大名鼎鼎的暴雪公司将Lua语言引入到“魔兽世界”这款游戏中，Rovio公司将Lua语言作为“愤怒的小鸟”这款火爆游戏的关卡升级引擎，Web服务器Nginx 将Lua语言作为扩展，增强自身功能。**Redis将Lua作为脚本语言可帮助开发者定制自己的Redis命令。**Lua语言提供了如下几种数据类型：**booleans（布尔）、numbers（数值）、strings（字符串）、tables（表格**），和许多高级语言相比，相对简单。
 
-- **-c（clients）选项代表客户端的并发数量（默认是50）。**
-- **-n（num）选项代表客户端请求总量（默认是100000）。**
+```lua
+-- "--"是Lua语言的注释
 
-例如：`redis-benchmark -c 100 -n 20000` 代表100各个客户端同时请求Redis，一共执行20000次。redis-benchmark会对各类数据结构的命令进行测试，并给出性能指标： 
+-- local代表val是一个局部变量，如果没有local代表是全局变量。
+local strings val = "world"
+print(val)  -- 打印字符串"world" 
+
+-- 在Lua中，如果要使用类似数组的功能，可以用tables类型。
+-- 定义了一个tables类型的变量 `myArray`，但和大多数编程语言不同的是，Lua的数组下标从1开始计算。
+local tables myArray = {"redis", "jedis", true, 88.0} 
+print(myArray[3])  -- 输出true 
+
+-- 使用for和while可以遍历这个数组，关键字for以end作为结束符。
+-- 遍历myArray，首先需要知道tables的长度，只需要在变量前加一个 `#` 号即可
+for i = 1, #myArray 
+do 
+    print(myArray[i]) 
+end
+
+-- 使用for循环计算1到100的和
+local int sum = 0 
+for i = 1, 100 
+do 
+    sum = sum + i 
+end 
+print(sum)  -- 输出结果为5050
+
+-- 使用while循环计算1到100的和
+local int sum = 0 
+local int i = 0 
+while i <= 100 
+do 
+    sum = sum +i 
+    i = i + 1 
+end 
+print(sum)  -- 输出结果为5050 
+
+-- Lua还提供了内置函数ipairs可以遍历出所有的索引下标和值
+for index,value in ipairs(myArray) 
+do 
+    print(index) 
+    print(value) 
+end
+
+-- if判断，then紧跟，end结尾
+-- 要确定数组中是否包含了jedis，有则打印true
+local tables myArray = {"redis", "jedis", true, 88.0} 
+for i = 1, #myArray 
+do 
+    if myArray[i] == "jedis" 
+    then
+        print("true") 
+        break 
+    else
+        --do nothing 
+    end 
+end
+
+-- 哈希，使用类似哈希的功能，同样可以使用tables类型。
+-- 定义了一个tables，每个元素包含了key和value，其strings1..string2是将两 个字符串进行连接：
+local tables user_1 = {age = 28, name = "tome"} 
+print("user_1 age is " .. user_1["age"])  -- user_1 age is 28 
+
+-- 函数定义，在Lua中，函数以 `function` 开头，以 `end` 结尾，`funcName` 是函数名，中间部分是函数体：
+function funcName() 
+    ... 
+end 
+contact函数将两个字符串拼接： 
+function contact(str1, str2) 
+    return str1 .. str2 
+end 
+print(contact("hello ", "world"))  -- "hello world" 
+```
+
+除了使用 `redis-cli --eval` 直接执行Lua脚本文件，在Redis中执行Lua脚本还有有两种方法：`eval` 和 `evalsha`：
 
 ```
-====== GET ====== 
-    20000 requests completed in 0.27 seconds 
-    100 parallel clients 
-    3 bytes payload keep alive: 1 
-99.11% <= 1 milliseconds 
-100.00% <= 1 milliseconds 
-73529.41 requests per second
+eval 脚本内容 key个数 key列表 参数列表
 ```
 
-上面一共执行了20000次get操作，在0.27秒完成，每个请求数据量是3个字节，99.11%的命令执行时间小于1毫秒，Redis每秒可以处理 73529.41次get请求。
-
-- **-q选项仅仅显示redis-benchmark的requests per second信息。**
-- **-r（random）选项在key、counter键上加一个12位的后缀，向 Redis插入随机键。**`-r 10000`代表只对后四位做随机处理（-r不是随机数的个数）。
-- **-P选项代表每个请求pipeline的数据量（默认为1）。**
-- **-k选项代表客户端是否使用keepalive，1为使用，0为不使用，默认值为1。**
-- **-t选项可以对指定命令进行基准测试。**
+使用 `key` 列表和参数列表来为Lua脚本提供更多的灵活性：
 
 ```
-redis-benchmark -t get,set -q 
-SET: 98619.32 requests per second 
-GET: 97560.98 requests per second
+127.0.0.1:6379> eval 'return "hello " .. KEYS[1] .. ARGV[1]' 1 redis world "hello redisworld"
 ```
 
-- **--csv选项会将结果按照csv格式输出，便于后续处理，如导出到Excel等。**
+此时 `KEYS[1]="redis"`，`ARGV[1]="world"`，所以最终的返回结是 `"hello redisworld"`。 
+
+**`eval` 命令和 `--eval` 参数本质是一样的，客户端如果想执行Lua脚本，首先在客户端编写好Lua脚本代码，然后把脚本作为字符串发送给服务端，服务端会将执行结果返回给客户端。**
+
+![QQ截图20200531112743](image/QQ截图20200531112743.png)
+
+Redis还提供了 `evalsha` 命令来执行Lua脚本。首先要将Lua脚本加载到Redis服务端，得到该脚本的SHA1校验和，`evalsha` 命令使用SHA1作为参数可以直接执行对应Lua脚本，避免每次发送Lua脚本的开销。这样客户端就不需要每次执行脚本内容，而脚本也会常驻在服务端，脚本功能得到了复用。
+
+![QQ截图20200531113033](image/QQ截图20200531113033.png)
+
+**加载脚本**：`script load` 命令可以将Lua脚本内容加载到Redis内存中。
 
 ```
-redis-benchmark -t get,set --csv 
-"SET","81300.81" 
-"GET","79051.38"
+script load script
 ```
+
+将 `lua_get.lua` 加载到Redis中，得到SHA1 为："7413dc2440db1fea7c0a0bde841fa68eefaf149c" 
+
+```
+# redis-cli script load "$(cat lua_get.lua)" 
+"7413dc2440db1fea7c0a0bde841fa68eefaf149c"
+```
+
+**是否加载**：`script exists` 命令用于判断sha1是否已经加载到Redis内存中。返回结果代表sha1[sha1…]被加载到Redis内存的个数。
+
+```
+127.0.0.1:6379> script exists a5260dd66ce02462c5b5231c727b3f7772c0bcc5 
+1) (integer) 1
+```
+
+**清除脚本**：`script flush ` 命令用于清除Redis内存已经加载的所有Lua脚本。
+
+```
+127.0.0.1:6379> script exists a5260dd66ce02462c5b5231c727b3f7772c0bcc5
+1) (integer) 1 
+127.0.0.1:6379> script flush 
+OK
+127.0.0.1:6379> script exists a5260dd66ce02462c5b5231c727b3f7772c0bcc5 
+1) (integer) 0
+```
+
+**执行脚本**：`evalsha` 的使用方法如下，参数使用SHA1值，执行逻辑和 `eval` 一致。
+
+```
+evalsha 脚本SHA1值 key个数 key列表 参数列表
+```
+
+调用 `lua_get.lua` 脚本：
+
+```
+127.0.0.1:6379> evalsha 7413dc2440db1fea7c0a0bde841fa68eefaf149c 1 redis world "hello redisworld"
+```
+
+**杀掉脚本**：`script kill` 命令用于杀掉正在执行的Lua脚本。
+
+```
+script kill
+```
+
+!> 注意：有一点需要注意，如果当前Lua脚本正在执行写操作，那么 `script kill` 将不会生效。要么等待脚本执行结束要么使用 `shutdown save` 停掉Redis服务。可见Lua脚本虽然好用，但是使用不当破坏性也是难以想象的。 
 
 ### 客户端管理
 
@@ -516,6 +633,95 @@ client-output-buffer-limit normal 20mb 10mb 120
 3. 适当增大slave的输出缓冲区的，如果master节点写入较大，slave客户端的输出缓冲区可能会比较大，一旦slave客户端连接因为输出缓冲区溢出被kill，会造成复制重连。
 4. 限制容易让输出缓冲区增大的命令，例如，高并发下的monitor命令就是一个危险的命令。 
 5. 及时监控内存，一旦发现内存抖动频繁，可能就是输出缓冲区过大。
+
+#### 慢查询分析
+
+慢查询分析：**通过慢查询分析，找到有问题的命令进行优化。**
+
+许多存储系统（例如MySQL）提供慢查询日志帮助开发和运维人员定位系统存在的慢操作。所谓慢查询日志就是系统在命令执行前后计算每条命令的执行时间，当超过预设阀值，就将这条命令的相关信息（例如：发生时间，耗时，命令的详细信息）记录下来，Redis也提供了类似的功能。
+
+Redis客户端执行一条命令分为如下4个部分：
+
+![QQ截图20200525231507](image/QQ截图20200525231507.png)
+
+**需要注意的是，慢查询只统计步骤3，即命令的执行时间。**
+
+**预设阈值命令 `slowlog-log-slower-than`** ：单位是微秒（1秒=1000毫秒=1000000微秒），默认值是10000，假如执行了一条“很慢”的命令（例如keys*），如果它的执行时间超过了10000微秒，那么它将被记录在慢查询日志中。
+
+?> 提示：如果 `slowlog-log-slower-than=0` 会记录所有的命令，`slowlog-log-slower-than<0` 对于任何命令都不会进行记录，建议配置默认值超过10毫秒判定为慢查询。
+
+**慢查询日志长度 `slowlog-max-len`**：实际上是一个列表来存储慢查询日志，`slowlog-max-len` 就是列表的最大长度。
+
+如果慢查询日志列表已处于其最大长度时，最早插入的一个命令将从列表中移出，这样可能会丢失部分慢查询命令，为了防止这种情况发生，可以定期执行 `slow get` 命令将慢查询日志持久化到其他存储中（例如MySQL）
+
+?> 提示：`slowlog-max-len` 配置建议，设置为1000以上。
+
+使用 `config set` 命令将 `slowlog-log-slower-than` 设置为20000微秒，`slowlog-max-len` 设置为1000，再执行 `config rewrite` 命令将配置持久化到本地配置文件：
+
+```
+config set slowlog-log-slower-than 20000
+config set slowlog-max-len 1000
+config rewrite
+```
+
+![QQ截图20200525232645](image/QQ截图20200525232645.png)
+
+**获取慢查询日志**
+
+```
+slowlog get [n]
+```
+
+- 参数n可以指定条数
+
+```
+127.0.0.1:6379> slowlog get 
+1) 1) (integer) 666
+   2) (integer) 1456786500 
+   3) (integer) 11615 
+   4) 1) "BGREWRITEAOF" 
+2) 1) (integer) 665 
+   2) (integer) 1456718400 
+   3) (integer) 12006 
+   4) 1) "SETEX" 
+      2) "video_info_200" 
+      3) "300" 
+      4) "2" ...
+```
+
+每个慢查询日志有4个属性组成，分别是**慢查询日志的标识 id、发生时间戳、命令耗时、执行命令和参数**：
+
+![QQ截图20200525233210](image/QQ截图20200525233210.png)
+
+**获取慢查询日志列表当前的长度**
+
+```
+slowlog len
+```
+
+当前Redis中有45条慢查询：
+
+```
+127.0.0.1:6379> slowlog len 
+(integer) 45
+```
+
+**慢查询日志重置**
+
+```
+slowlog reset
+```
+
+实际是对列表做清理操作：
+
+```
+127.0.0.1:6379> slowlog len 
+(integer) 45 
+127.0.0.1:6379> slowlog reset 
+OK
+127.0.0.1:6379> slowlog len 
+(integer) 0
+```
 
 ## 关闭
 
